@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  font-family: "Ensign:Sans";
+  @apply bg-slate-950 text-slate-50;
+}
+
+h1 {
+  font-family: "Ensign:Serif";
+  @apply uppercase text-center text-4xl mb-8;
+}
+
+.spoiler-button {
+  @apply block border-b border-y-slate-500 w-full text-left p-4 hover:bg-slate-50/10;
+}
+
+.spoiler-contents {
+  @apply flex flex-wrap gap-2 justify-center py-4 bg-slate-950/20 border-b border-slate-500;
+}
+
+.link-to-chapter {
+  @apply border rounded-full w-8 h-8 flex items-center justify-center cursor-pointer border-slate-500 hover:bg-slate-500;
+}
+
+.reader {
+  font-family: "Ensign:Serif";
+  @apply flex flex-col overflow-y-scroll items-center py-16;
+}
+
+.verse {
+  font-family: "Ensign:Serif";
+  @apply text-xl p-4 hover:bg-slate-800 rounded-xl max-w-2xl;
+}
+
+.verse sup {
+  @apply inline opacity-50 mr-2 hover:underline hover:opacity-100 select-none;
+}
