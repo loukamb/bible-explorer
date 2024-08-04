@@ -3,12 +3,12 @@ import ReactDOM from "react-dom/client"
 import App from "./components/App.jsx"
 import "./index.css"
 
-import { BibleProvider } from "./components/BibleProvider.jsx"
+import { ScripturesProvider } from "./components/Scripture.tsx"
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <BibleProvider>
+    <ScripturesProvider>
       <App />
-    </BibleProvider>
+    </ScripturesProvider>
   </React.StrictMode>
 )

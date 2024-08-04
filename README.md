@@ -1,25 +1,26 @@
 # Bible Explorer
 
-Bible study tools written in React using the [NKJV](https://en.wikipedia.org/wiki/New_King_James_Version) translation, which is my personal preference. Currently not adapted for mobile use.
+Bible study tools written in React, mainly for personal use. Currently not adapted for mobile devices.
 
 [You can access it here.](https://bible-explorer.louka.sh)
 
 ## Features
 
 - Distraction-less interface
-- Full Old Testament & New Testament
-- Tabbed browsing for individual Bible chapters
+- Tabbed browsing for individual chapters
 - Toggleable sidebar listing the scriptures
 - Search engine for verse contents
 - Adjustable zoom level (separate from browser zoom)
 - Current workspace state saves in URL (for saving)
+
+**Currently included scripture:** Old Testament & New Testament (NKJV), Book of Mormon, Doctrine & Covenants, Pearl of Great Price. Scripture is added regardless of theological validity or sectarian opinion, as this tool is not specifically geared towards any particular Christian denomination.
 
 ### Planned
 
 - Additional Bible translations (e.g. ESV)
 - Saveable chapters and verses with `LocalStorage`
 - Broader search engine for full-Bible searches
-- Scriptures from other Christian sects (e.g. Book of Common Prayer, Book of Mormon, etc.)
+- Scriptures from other Christian sects (e.g. Book of Common Prayer, etc.)
 - Dictionary for verse interpretation
 
 ## Other tools

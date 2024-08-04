@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { Icon } from "@iconify/react"
 
 import Spoiler from "./Spoiler"
-import { useBible } from "./BibleProvider"
+import { useScriptures } from "./Scripture"
 
 function Tab({ onClick, onDelete, selected, children }) {
   return (
@@ -24,7 +24,7 @@ function Tab({ onClick, onDelete, selected, children }) {
 }
 
 function App() {
-  const bible = useBible()
+  const scriptures = useScriptures()
 
   // Variables, parameters, etc.
   // ====================================================================
@@ -37,6 +37,8 @@ function App() {
   const [verseSearch, setVerseSearch] = useState("")
   const [zoomLevel, setZoomLevel] = useState(1)
   const [barHidden, setBarHidden] = useState(false)
+  const [selectedScripture, setSelectedScripture] = useState("nkjv")
+  const scriptureSelector = useRef(null)
 
   const [readyToUpdateState, setReadyToUpdateState] = useState(false)
 
@@ -47,7 +49,7 @@ function App() {
    * Add a new tab.
    */
   const addTab = useCallback(
-    (book, chapter, focus) => {
+    (scripture, book, chapter, focus) => {
       const existingTabIndex = tabs.findIndex(
         (t) => t.book === book && t.chapter === chapter
       )
@@ -60,10 +62,9 @@ function App() {
         {
           book,
           chapter,
-          index: bible.books.findIndex((bk) => bk.name === book.name),
-
-          // TODO: Add this to the bible.json, eventually
-          id: book.name.replace(/\s/g, "").toLowerCase(),
+          scripture,
+          id: book.id,
+          index: scripture.books.findIndex((bk) => bk.name === book.name),
         },
       ])
       if (focus) {
@@ -103,13 +104,15 @@ function App() {
       )
       setTabs(
         indices.map((tab) => ({
-          index: tab[0],
-          book: bible.books[tab[0]],
-          chapter: bible.books[tab[0]].chapters[tab[1]],
-          id: bible.books[tab[0]].name.replace(/\s/g, "").toLowerCase(),
+          scripture: scriptures[tab[0]],
+          index: tab[1],
+          book: scriptures[tab[0]].books[tab[1]],
+          chapter: scriptures[tab[0]].books[tab[1]].chapters[tab[2]],
+          id: scriptures[tab[0]].books[tab[1]].id,
         }))
       )
       setSelectedTabIndex(stateIndex)
+      setSelectedScripture(indices[stateIndex][0])
     }
     setReadyToUpdateState(true)
   }, [])
@@ -127,7 +130,11 @@ function App() {
             btoa(
               JSON.stringify([
                 selectedTabIndex,
-                tabs.map((tab) => [tab.index, tab.chapter.num - 1]),
+                tabs.map((tab) => [
+                  tab.scripture.id,
+                  tab.index,
+                  tab.chapter.num - 1,
+                ]),
               ])
             )
           )
@@ -150,13 +157,29 @@ function App() {
             barHidden ? "hidden" : "block"
           } w-1/6 h-full overflow-y-scroll bg-slate-700 text-slate-50 scrollbar-thin scrollbar-thumb-slate-500 scrollbar-track-transparent scrollbar-corner-transparent`}
         >
+          <div
+            onClick={() => scriptureSelector.current?.click()}
+            className="flex items-center border-b border-slate-500 focus:bg-slate-600 hover:bg-slate-600 px-4 py-2 gap-2"
+          >
+            <Icon icon="fluent:book-16-regular" />
+            <select
+              ref={scriptureSelector}
+              className="w-full bg-inherit placeholder-slate-500 outline-none font-sans"
+              value={selectedScripture}
+              onChange={(e) => setSelectedScripture(e.target.value)}
+            >
+              {Object.entries(scriptures).map(([, scriptureValue]) => (
+                <option value={scriptureValue.id}>{scriptureValue.name}</option>
+              ))}
+            </select>
+          </div>
           <input
             value={bookSearch}
             onChange={(e) => setBookSearch(e.target.value.trim().toLowerCase())}
             placeholder="Search"
             className="w-full bg-inherit placeholder-slate-500 focus:bg-slate-600 hover:bg-slate-600 border-b border-slate-500 outline-none font-sans p-4 transition"
           />
-          {bible.books.map(
+          {scriptures[selectedScripture].books.map(
             (book) =>
               (bookSearch === "" ||
                 book.name.toLowerCase().includes(bookSearch)) && (
@@ -165,7 +188,14 @@ function App() {
                     <button
                       key={i + 1}
                       className="link-to-chapter"
-                      onClick={() => addTab(book, chapter, true)}
+                      onClick={() =>
+                        addTab(
+                          scriptures[selectedScripture],
+                          book,
+                          chapter,
+                          true
+                        )
+                      }
                     >
                       {i + 1}
                     </button>
@@ -189,10 +219,16 @@ function App() {
               {tabs.map((tab, i) => (
                 <Tab
                   key={`${tab.book.name}:${tab.chapter.num}`}
-                  onClick={() => setSelectedTabIndex(i)}
+                  onClick={() => (
+                    setSelectedScripture(tab.scripture.id),
+                    setSelectedTabIndex(i)
+                  )}
                   onDelete={() => removeTab(tab)}
                   selected={selectedTabIndex === i}
                 >
+                  <span className="text-xs bg-slate-900 px-1 rounded-md text-white/80">
+                    {tab.scripture.id.toUpperCase()}
+                  </span>{" "}
                   {tab.book.name} {tab.chapter.num}
                 </Tab>
               ))}
@@ -230,7 +266,7 @@ function App() {
                         <div key={verse.num} className="verse">
                           <a
                             id={verse.num}
-                            class="ref"
+                            className="ref"
                             target="_blank"
                             href={`https://bible.louka.sh/${selectedTab.id}/${selectedTab.chapter.num}/${verse.num}`}
                           >
