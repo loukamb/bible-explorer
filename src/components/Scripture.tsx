@@ -36,6 +36,33 @@ const availableScriptures = {
   pogp: "/scriptures/pearl-of-great-price.json",
 }
 
+const availableScripturesMap = Object.entries(availableScriptures)
+
+// Loading
+// ========================================================
+
+import { Icon } from "@iconify/react"
+
+function Loading({ value, max }: { value: number; max: number }) {
+  return (
+    <div className="w-screen h-screen flex flex-col gap-4 items-center justify-center">
+      <Icon className="text-6xl" icon="svg-spinners:3-dots-move" />
+      <div className="text-xl">
+        Loading scriptures {value}/{max}
+      </div>
+      <div className="opacity-50">
+        Problems?{" "}
+        <a
+          className="underline"
+          href="https://github.com/loukamb/bible-explorer/issues"
+        >
+          File a bug report.
+        </a>
+      </div>
+    </div>
+  )
+}
+
 // Logic
 // ========================================================
 
@@ -54,22 +81,26 @@ export function ScripturesProvider({
   const [scriptures, setScriptures] = useState<ScriptureRegistry | undefined>(
     undefined
   )
+  const [count, setCount] = useState(0)
   useEffect(() => {
     ;(async () => {
       const registry = {} as ScriptureRegistry
-      for (const [scriptureId, scripturePath] of Object.entries(
-        availableScriptures
-      )) {
+      for (const [scriptureId, scripturePath] of availableScripturesMap) {
         registry[scriptureId as keyof ScriptureRegistry] = await (
           await fetch(scripturePath)
         ).json()
+        setCount((c) => c + 1)
       }
       setScriptures(registry)
     })()
   }, [])
   return (
     <ScripturesContext.Provider value={scriptures}>
-      {scriptures !== undefined ? children : <></>}
+      {scriptures !== undefined ? (
+        children
+      ) : (
+        <Loading value={count} max={availableScripturesMap.length} />
+      )}
     </ScripturesContext.Provider>
   )
 }

@@ -280,6 +280,31 @@ function App() {
               )}
             </div>
           </div>
+          <div className="flex mt-auto bg-slate-800 px-4 py-2 text-sm gap-1">
+            Louka's Bible Explorer
+            <span>
+              (
+              <a
+                className="underline"
+                target="_blank"
+                href="https://github.com/loukamb/bible-explorer"
+              >
+                source code
+              </a>
+              ,{" "}
+              <a
+                className="underline"
+                target="_blank"
+                href="https://github.com/loukamb/bible-explorer/issues"
+              >
+                bug report
+              </a>
+              )
+            </span>
+            <span className="ml-auto">
+              This work has been released into the public domain.
+            </span>
+          </div>
         </main>
       </div>
     </>
