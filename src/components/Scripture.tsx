@@ -31,7 +31,10 @@ interface ScriptureVerse {
 
 const availableScriptures = {
   nkjv: "/scriptures/bible/nkjv.json",
-  //esv: "/scriptures/bible/esv.json",
+  kjv: "/scriptures/bible/kjv.json",
+  niv: "/scriptures/bible/niv.json",
+  esv: "/scriptures/bible/esv.json",
+  nrsvce: "/scriptures/bible/nrsvce.json",
   bom: "/scriptures/book-of-mormon.json",
   "d&c": "/scriptures/doctrine-and-covenants.json",
   pogp: "/scriptures/pearl-of-great-price.json",
