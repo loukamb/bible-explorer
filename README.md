@@ -14,6 +14,7 @@ Scripture is added regardless of theological validity or sectarian opinion, as t
 - English Standard Version (**recommended**)
 - New International Version
 - New Revised Standard Version, Catholic Edition
+- New American Standard Bible
 - Legacy Standard Bible
 - King James Version
 
