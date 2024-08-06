@@ -166,12 +166,12 @@ function App() {
         >
           <div
             onClick={() => scriptureSelector.current?.click()}
-            className="flex items-center border-b border-slate-500 focus:bg-slate-600 hover:bg-slate-600 px-4 py-2 gap-2"
+            className="flex items-center border-b group border-slate-500 focus:bg-slate-600 hover:bg-slate-600 px-4 py-2 gap-2"
           >
             <Icon icon="fluent:book-16-regular" />
             <select
               ref={scriptureSelector}
-              className="w-full bg-inherit placeholder-slate-500 outline-none font-sans"
+              className="w-full bg-slate-700 group-hover:bg-inherit placeholder-slate-500 outline-none font-sans"
               value={selectedScripture}
               onChange={(e) => setSelectedScripture(e.target.value)}
             >
