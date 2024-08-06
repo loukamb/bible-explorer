@@ -34,6 +34,7 @@ const availableScriptures = {
   kjv: "/scriptures/bible/kjv.json",
   niv: "/scriptures/bible/niv.json",
   esv: "/scriptures/bible/esv.json",
+  lsb: "/scriptures/bible/lsb.json",
   nrsvce: "/scriptures/bible/nrsvce.json",
   bom: "/scriptures/book-of-mormon.json",
   "d&c": "/scriptures/doctrine-and-covenants.json",

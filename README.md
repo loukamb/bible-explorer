@@ -4,6 +4,25 @@ Bible study tools written in React, mainly for personal use. Currently not adapt
 
 [You can access it here.](https://bible-explorer.louka.sh)
 
+### Currently included scripture
+
+Scripture is added regardless of theological validity or sectarian opinion, as this tool is not specifically geared towards any particular Christian denomination.
+
+#### Christian Canon
+
+- New King James Version (**default, recommended**)
+- English Standard Version (**recommended**)
+- New International Version
+- New Revised Standard Version, Catholic Edition
+- Legacy Standard Bible
+- King James Version
+
+#### Latter-day Saints Canon
+
+- Book of Mormon, 2013 edition
+- Doctrine & Covenants
+- Pearl of Great Price
+
 ## Features
 
 - Distraction-less interface
@@ -13,11 +32,8 @@ Bible study tools written in React, mainly for personal use. Currently not adapt
 - Adjustable zoom level (separate from browser zoom)
 - Current workspace state saves in URL (for saving)
 
-**Currently included scripture:** Old Testament & New Testament (NKJV), Book of Mormon, Doctrine & Covenants, Pearl of Great Price. Scripture is added regardless of theological validity or sectarian opinion, as this tool is not specifically geared towards any particular Christian denomination.
-
 ### Planned
 
-- Additional Bible translations (e.g. ESV)
 - Saveable chapters and verses with `LocalStorage`
 - Broader search engine for full-Bible searches
 - Scriptures from other Christian sects (e.g. Book of Common Prayer, etc.)
