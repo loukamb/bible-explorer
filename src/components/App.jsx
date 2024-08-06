@@ -161,13 +161,10 @@ function App() {
       <div className="h-screen w-screen max-h-screen flex">
         <div
           className={`${
-            barHidden ? "hidden" : "block"
-          } w-1/6 h-full overflow-y-scroll bg-slate-700 text-slate-50 scrollbar-thin scrollbar-thumb-slate-500 scrollbar-track-transparent scrollbar-corner-transparent`}
+            barHidden ? "md:hidden -translate-x-full" : "md:block translate-x-0"
+          } lg:w-[24rem] w-[80%] md:static absolute z-50 transition h-full overflow-y-scroll bg-slate-700 text-slate-50 scrollbar-thin scrollbar-thumb-slate-500 scrollbar-track-transparent scrollbar-corner-transparent`}
         >
-          <div
-            onClick={() => scriptureSelector.current?.click()}
-            className="flex items-center border-b group border-slate-500 focus:bg-slate-600 hover:bg-slate-600 px-4 py-2 gap-2"
-          >
+          <div className="flex items-center border-b group border-slate-500 focus:bg-slate-600 hover:bg-slate-600 px-4 py-2 gap-2">
             <Icon icon="fluent:book-16-regular" />
             <select
               ref={scriptureSelector}
@@ -185,6 +182,12 @@ function App() {
                 </optgroup>
               ))}
             </select>
+            <button
+              className="md:hidden inline"
+              onClick={() => setBarHidden(true)}
+            >
+              <Icon icon="fluent:dismiss-12-regular" />
+            </button>
           </div>
           <input
             value={bookSearch}
@@ -192,30 +195,32 @@ function App() {
             placeholder="Search"
             className="w-full bg-inherit placeholder-slate-500 focus:bg-slate-600 hover:bg-slate-600 border-b border-slate-500 outline-none font-sans p-4 transition"
           />
-          {scriptures[selectedScripture].books.map(
-            (book) =>
-              (bookSearch === "" ||
-                book.name.toLowerCase().includes(bookSearch)) && (
-                <Spoiler key={book.name} name={book.name}>
-                  {book.chapters.map((chapter, i) => (
-                    <button
-                      key={i + 1}
-                      className="link-to-chapter"
-                      onClick={() =>
-                        addTab(
-                          scriptures[selectedScripture],
-                          book,
-                          chapter,
-                          true
-                        )
-                      }
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
-                </Spoiler>
-              )
-          )}
+          <div>
+            {scriptures[selectedScripture].books.map(
+              (book) =>
+                (bookSearch === "" ||
+                  book.name.toLowerCase().includes(bookSearch)) && (
+                  <Spoiler key={book.name} name={book.name}>
+                    {book.chapters.map((chapter, i) => (
+                      <button
+                        key={i + 1}
+                        className="link-to-chapter"
+                        onClick={() =>
+                          addTab(
+                            scriptures[selectedScripture],
+                            book,
+                            chapter,
+                            true
+                          )
+                        }
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                  </Spoiler>
+                )
+            )}
+          </div>
         </div>
         <main className="flex flex-col grow h-full w-full">
           <nav className="flex items-center bg-slate-800 h-10">
@@ -224,9 +229,12 @@ function App() {
               onClick={() => setBarHidden((c) => !c)}
             >
               <Icon
-                className={barHidden ? "rotate-180" : "rotate-0"}
+                className={`md:block hidden ${
+                  barHidden ? "rotate-180" : "rotate-0"
+                }`}
                 icon="fluent:arrow-left-12-regular"
               />
+              <Icon className="md:hidden" icon="fluent:book-16-regular" />
             </button>
             <div className="overflow-x-scroll scrollbar-none">
               {tabs.map((tab, i) => (
@@ -246,7 +254,7 @@ function App() {
                 </Tab>
               ))}
             </div>
-            <div className="flex items-center ml-auto p-4">
+            <div className="md:flex hidden items-center ml-auto p-4">
               <Icon icon="fluent:search-12-regular" className="mr-2" />
               <input
                 type="range"
@@ -270,7 +278,7 @@ function App() {
                       setVerseSearch(e.target.value.trim().toLowerCase())
                     }
                     placeholder="Search"
-                    className="sticky backdrop-blur-lg bg-slate-950/50 shadow-lg -top-12 w-full z-50 placeholder-slate-700 focus:bg-slate-800 hover:bg-slate-900 border border-slate-700 outline-none font-sans rounded-lg p-2 text-xl mb-8"
+                    className="sticky backdrop-blur-lg bg-slate-950/50 shadow-lg -top-12 w-full z-40 placeholder-slate-700 focus:bg-slate-800 hover:bg-slate-900 border border-slate-700 outline-none font-sans rounded-lg p-2 text-xl mb-8"
                   />
                   {selectedTab.chapter.verses.map(
                     (verse) =>
@@ -293,7 +301,7 @@ function App() {
               )}
             </div>
           </div>
-          <div className="flex mt-auto bg-slate-800 px-4 py-2 text-sm gap-1">
+          <div className="flex flex-col md:flex-row text-xs items-center mt-auto bg-slate-800 px-4 py-2 md:text-sm gap-1">
             Louka's Bible Explorer
             <span>
               (
@@ -314,7 +322,7 @@ function App() {
               </a>
               )
             </span>
-            <span className="ml-auto">
+            <span className="md:ml-auto">
               This work has been released into the public domain.
             </span>
           </div>

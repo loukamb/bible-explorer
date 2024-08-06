@@ -1,6 +1,6 @@
 # Bible Explorer
 
-Bible study tools written in React, mainly for personal use. Currently not adapted for mobile devices.
+Bible study tools written in React, mainly for personal use.
 
 [You can access it here.](https://bible-explorer.louka.sh)
 
