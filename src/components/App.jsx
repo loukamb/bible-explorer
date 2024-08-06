@@ -4,6 +4,23 @@ import { Icon } from "@iconify/react"
 import Spoiler from "./Spoiler"
 import { useScriptures } from "./Scripture"
 
+function useHorizontalScroll() {
+  const elRef = useRef()
+  useEffect(() => {
+    const el = elRef.current
+    if (el) {
+      const onWheel = (e) => {
+        if (e.deltaY == 0) return
+        e.preventDefault()
+        el.scrollBy(e.deltaY, 0)
+      }
+      el.addEventListener("wheel", onWheel)
+      return () => el.removeEventListener("wheel", onWheel)
+    }
+  }, [])
+  return elRef
+}
+
 function Tab({ onClick, onDelete, selected, children }) {
   return (
     <div
@@ -39,6 +56,7 @@ function App() {
   const [tabs, setTabs] = useState([])
   const [selectedTabIndex, setSelectedTabIndex] = useState(0)
   const selectedTab = tabs[selectedTabIndex]
+  const tabBar = useHorizontalScroll()
 
   const [bookSearch, setBookSearch] = useState("")
   const [verseSearch, setVerseSearch] = useState("")
@@ -158,11 +176,11 @@ function App() {
 
   return (
     <>
-      <div className="h-screen w-screen max-h-screen flex">
+      <div className="h-screen w-screen max-w-[100vw] max-h-screen flex">
         <div
           className={`${
             barHidden ? "md:hidden -translate-x-full" : "md:block translate-x-0"
-          } lg:w-[24rem] w-[80%] md:static absolute z-50 transition h-full overflow-y-scroll bg-slate-700 text-slate-50 scrollbar-thin scrollbar-thumb-slate-500 scrollbar-track-transparent scrollbar-corner-transparent`}
+          } lg:w-[24rem] lg:min-w-[24rem] w-[80%] min-w-[80%] md:static absolute z-50 transition h-full overflow-y-scroll bg-slate-700 text-slate-50 scrollbar-thin scrollbar-thumb-slate-500 scrollbar-track-transparent scrollbar-corner-transparent`}
         >
           <div className="flex items-center border-b group border-slate-500 focus:bg-slate-600 hover:bg-slate-600 px-4 py-2 gap-2">
             <Icon icon="fluent:book-16-regular" />
@@ -222,8 +240,8 @@ function App() {
             )}
           </div>
         </div>
-        <main className="flex flex-col grow h-full w-full">
-          <nav className="flex items-center bg-slate-800 h-10">
+        <main className="flex flex-col h-full w-0 grow">
+          <nav className="flex items-center bg-slate-800 h-10 grow">
             <button
               className="w-fit inline-block px-4 py-3 hover:bg-slate-600"
               onClick={() => setBarHidden((c) => !c)}
@@ -236,7 +254,10 @@ function App() {
               />
               <Icon className="md:hidden" icon="fluent:book-16-regular" />
             </button>
-            <div className="overflow-x-scroll scrollbar-none">
+            <div
+              ref={tabBar}
+              className="whitespace-nowrap overflow-auto scrollbar-none"
+            >
               {tabs.map((tab, i) => (
                 <Tab
                   key={`${tab.book.name}:${tab.chapter.num}`}
