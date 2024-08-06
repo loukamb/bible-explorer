@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { Icon } from "@iconify/react"
 
 import Spoiler from "./Spoiler"
@@ -24,10 +24,17 @@ function Tab({ onClick, onDelete, selected, children }) {
 }
 
 function App() {
-  const scriptures = useScriptures()
-
   // Variables, parameters, etc.
   // ====================================================================
+
+  const scriptures = useScriptures()
+  const groups = useMemo(() => {
+    const groups = {}
+    for (const [, scripture] of Object.entries(scriptures)) {
+      ;(groups[scripture.category ?? "Other"] ||= []).push(scripture)
+    }
+    return groups
+  }, [scriptures])
 
   const [tabs, setTabs] = useState([])
   const [selectedTabIndex, setSelectedTabIndex] = useState(0)
@@ -168,8 +175,14 @@ function App() {
               value={selectedScripture}
               onChange={(e) => setSelectedScripture(e.target.value)}
             >
-              {Object.entries(scriptures).map(([, scriptureValue]) => (
-                <option value={scriptureValue.id}>{scriptureValue.name}</option>
+              {Object.entries(groups).map(([scriptureGroup, scriptures]) => (
+                <optgroup label={scriptureGroup}>
+                  {Object.entries(scriptures).map(([, scriptureValue]) => (
+                    <option value={scriptureValue.id}>
+                      {scriptureValue.name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>

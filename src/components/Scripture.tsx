@@ -6,6 +6,7 @@ import { useState, useEffect, useContext, createContext } from "react"
 interface Scripture {
   readonly id: string
   readonly name: string
+  readonly category: string
   readonly books: readonly ScriptureBook[]
 }
 
