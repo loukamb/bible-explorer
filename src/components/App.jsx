@@ -241,7 +241,7 @@ function App() {
           </div>
         </div>
         <main className="flex flex-col h-full w-0 grow">
-          <nav className="flex items-center bg-slate-800 h-10 grow">
+          <nav className="flex items-center bg-slate-800 h-10">
             <button
               className="w-fit inline-block px-4 py-3 hover:bg-slate-600"
               onClick={() => setBarHidden((c) => !c)}
