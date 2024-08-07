@@ -20,6 +20,7 @@ export default function Spoiler({ name, children }) {
         />
       </button>
       <motion.div
+        initial={{ height: 0 }}
         animate={{
           height: shown ? "auto" : "0",
         }}
