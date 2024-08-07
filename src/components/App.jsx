@@ -178,9 +178,18 @@ function App() {
     <>
       <div className="h-screen w-screen max-w-[100vw] max-h-screen flex">
         <div
+          className={`absolute left-0 top-0 w-screen h-screen z-40 transition duration-300 ${
+            barHidden
+              ? "pointer-events-none backdrop-blur-0 bg-transparent"
+              : "pointer-events-auto backdrop-blur-sm bg-black/20"
+          }`}
+          onClick={() => setBarHidden(true)}
+        />
+
+        <div
           className={`${
-            barHidden ? "md:hidden -translate-x-full" : "md:block translate-x-0"
-          } lg:w-[24rem] lg:min-w-[24rem] w-[80%] min-w-[80%] md:static absolute z-50 transition h-full overflow-y-scroll bg-slate-700 text-slate-50 scrollbar-thin scrollbar-thumb-slate-500 scrollbar-track-transparent scrollbar-corner-transparent`}
+            barHidden ? "-translate-x-full" : "translate-x-0"
+          } duration-300 lg:w-[24rem] lg:min-w-[24rem] w-[80%] min-w-[80%] absolute z-50 transition h-full overflow-y-scroll bg-slate-700 text-slate-50 scrollbar-thin scrollbar-thumb-slate-500 scrollbar-track-transparent scrollbar-corner-transparent`}
         >
           <div className="flex items-center border-b group border-slate-500 focus:bg-slate-600 hover:bg-slate-600 px-4 py-2 gap-2">
             <Icon icon="fluent:book-16-regular" />
@@ -200,10 +209,7 @@ function App() {
                 </optgroup>
               ))}
             </select>
-            <button
-              className="md:hidden inline"
-              onClick={() => setBarHidden(true)}
-            >
+            <button className="inline" onClick={() => setBarHidden(true)}>
               <Icon icon="fluent:dismiss-12-regular" />
             </button>
           </div>
@@ -223,14 +229,15 @@ function App() {
                       <button
                         key={i + 1}
                         className="link-to-chapter"
-                        onClick={() =>
+                        onClick={() => {
                           addTab(
                             scriptures[selectedScripture],
                             book,
                             chapter,
                             true
                           )
-                        }
+                          setBarHidden(true)
+                        }}
                       >
                         {i + 1}
                       </button>
@@ -246,13 +253,7 @@ function App() {
               className="w-fit inline-block px-4 py-3 hover:bg-slate-600"
               onClick={() => setBarHidden((c) => !c)}
             >
-              <Icon
-                className={`md:block hidden ${
-                  barHidden ? "rotate-180" : "rotate-0"
-                }`}
-                icon="fluent:arrow-left-12-regular"
-              />
-              <Icon className="md:hidden" icon="fluent:book-16-regular" />
+              <Icon icon="fluent:book-16-regular" />
             </button>
             <div
               ref={tabBar}
@@ -299,7 +300,7 @@ function App() {
                       setVerseSearch(e.target.value.trim().toLowerCase())
                     }
                     placeholder="Search"
-                    className="sticky backdrop-blur-lg bg-slate-950/50 shadow-lg -top-12 w-full z-40 placeholder-slate-700 focus:bg-slate-800 hover:bg-slate-900 border border-slate-700 outline-none font-sans rounded-lg p-2 text-xl mb-8"
+                    className="sticky backdrop-blur-lg bg-slate-950/50 shadow-lg -top-12 w-full z-30 placeholder-slate-700 focus:bg-slate-800 hover:bg-slate-900 border border-slate-700 outline-none font-sans rounded-lg p-2 text-xl mb-8"
                   />
                   {selectedTab.chapter.verses.map(
                     (verse) =>
