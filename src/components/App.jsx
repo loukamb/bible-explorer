@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { Icon } from "@iconify/react"
+import { LayoutGroup } from "framer-motion"
 
 import Spoiler from "./Spoiler"
 import { useScriptures } from "./Scripture"
@@ -191,7 +192,7 @@ function App() {
             barHidden ? "-translate-x-full" : "translate-x-0"
           } duration-300 lg:w-[24rem] lg:min-w-[24rem] w-[80%] min-w-[80%] absolute z-50 transition h-full overflow-y-scroll bg-slate-700 text-slate-50 scrollbar-thin scrollbar-thumb-slate-500 scrollbar-track-transparent scrollbar-corner-transparent`}
         >
-          <div className="flex items-center border-b group border-slate-500 focus:bg-slate-600 hover:bg-slate-600 px-4 py-2 gap-2">
+          <div className="flex items-center border-b group border-slate-500 focus:bg-slate-600 hover:bg-slate-600 px-4 py-2 gap-2 transition">
             <Icon icon="fluent:book-16-regular" />
             <select
               ref={scriptureSelector}
@@ -220,37 +221,39 @@ function App() {
             className="w-full bg-inherit placeholder-slate-500 focus:bg-slate-600 hover:bg-slate-600 border-b border-slate-500 outline-none font-sans p-4 transition"
           />
           <div>
-            {scriptures[selectedScripture].books.map(
-              (book) =>
-                (bookSearch === "" ||
-                  book.name.toLowerCase().includes(bookSearch)) && (
-                  <Spoiler key={book.name} name={book.name}>
-                    {book.chapters.map((chapter, i) => (
-                      <button
-                        key={i + 1}
-                        className="link-to-chapter"
-                        onClick={() => {
-                          addTab(
-                            scriptures[selectedScripture],
-                            book,
-                            chapter,
-                            true
-                          )
-                          setBarHidden(true)
-                        }}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
-                  </Spoiler>
-                )
-            )}
+            <LayoutGroup>
+              {scriptures[selectedScripture].books.map(
+                (book) =>
+                  (bookSearch === "" ||
+                    book.name.toLowerCase().includes(bookSearch)) && (
+                    <Spoiler key={book.name} name={book.name}>
+                      {book.chapters.map((chapter, i) => (
+                        <button
+                          key={i + 1}
+                          className="link-to-chapter"
+                          onClick={() => {
+                            addTab(
+                              scriptures[selectedScripture],
+                              book,
+                              chapter,
+                              true
+                            )
+                            setBarHidden(true)
+                          }}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
+                    </Spoiler>
+                  )
+              )}
+            </LayoutGroup>
           </div>
         </div>
         <main className="flex flex-col h-full w-0 grow">
           <nav className="flex items-center bg-slate-800 h-10">
             <button
-              className="w-fit inline-block px-4 py-3 hover:bg-slate-600"
+              className="w-fit inline-block px-4 py-3 hover:bg-slate-600 cursor-default transition"
               onClick={() => setBarHidden((c) => !c)}
             >
               <Icon icon="fluent:book-16-regular" />
