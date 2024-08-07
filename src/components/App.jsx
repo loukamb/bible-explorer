@@ -61,7 +61,7 @@ function App() {
   const [bookSearch, setBookSearch] = useState("")
   const [verseSearch, setVerseSearch] = useState("")
   const [zoomLevel, setZoomLevel] = useState(1)
-  const [barHidden, setBarHidden] = useState(false)
+  const [barHidden, setBarHidden] = useState(true)
   const [selectedScripture, setSelectedScripture] = useState("nkjv")
   const scriptureSelector = useRef(null)
 
