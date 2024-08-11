@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react"
 import { LayoutGroup } from "framer-motion"
 
 import Spoiler from "./Spoiler"
+import Verse from "./Verse"
 import { useScriptures } from "./Scripture"
 
 function useHorizontalScroll() {
@@ -309,17 +310,13 @@ function App() {
                     (verse) =>
                       (verseSearch === "" ||
                         verse.text.toLowerCase().includes(verseSearch)) && (
-                        <div key={verse.num} className="verse">
-                          <a
-                            id={verse.num}
-                            className="ref"
-                            target="_blank"
-                            href={`https://bible.louka.sh/${selectedTab.id}/${selectedTab.chapter.num}/${verse.num}`}
-                          >
-                            <sup>{verse.num}</sup>
-                          </a>
+                        <Verse
+                          key={verse.num}
+                          num={verse.num}
+                          href={`https://bible.louka.sh/${selectedTab.id}/${selectedTab.chapter.num}/${verse.num}`}
+                        >
                           {verse.text}
-                        </div>
+                        </Verse>
                       )
                   )}
                 </>

@@ -32,7 +32,7 @@ h1 {
 
 .verse {
   font-family: "Ensign:Serif";
-  @apply text-xl p-4 hover:bg-slate-800 rounded-xl max-w-2xl;
+  @apply text-xl p-4 hover:bg-slate-800/50 rounded-xl max-w-2xl transition;
 }
 
 .verse sup {
