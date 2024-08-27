@@ -1,4 +1,10 @@
-import { useState, useEffect, useContext, createContext } from "react"
+import {
+  useState,
+  useContext,
+  createContext,
+  useCallback,
+  useMemo,
+} from "react"
 
 // Definitions
 // ========================================================
@@ -42,39 +48,34 @@ const availableScriptures = {
   pogp: "/scriptures/pearl-of-great-price.json",
 }
 
-const availableScripturesMap = Object.entries(availableScriptures)
-
-// Loading
-// ========================================================
-
-import { Icon } from "@iconify/react"
-
-function Loading({ value, max }: { value: number; max: number }) {
-  return (
-    <div className="w-screen h-screen flex flex-col gap-4 items-center justify-center">
-      <Icon className="text-6xl" icon="svg-spinners:3-dots-move" />
-      <div className="text-xl">
-        Loading scriptures {value}/{max}
-      </div>
-      <div className="opacity-50">
-        Problems?{" "}
-        <a
-          className="underline"
-          href="https://github.com/loukamb/bible-explorer/issues"
-        >
-          File a bug report.
-        </a>
-      </div>
-    </div>
-  )
-}
+export const availableScriptureNames = {
+  nkjv: { name: "New King James Version", category: "Christian Canon" },
+  kjv: { name: "King James Version", category: "Christian Canon" },
+  niv: { name: "New International Version", category: "Christian Canon" },
+  esv: { name: "English Standard Version", category: "Christian Canon" },
+  lsb: { name: "Legacy Standard Bible", category: "Christian Canon" },
+  nasb: { name: "New American Standard Bible", category: "Christian Canon" },
+  nrsvce: {
+    name: "New Revised Standard Version Catholic Edition",
+    category: "Christian Canon",
+  },
+  bom: { name: "Book of Mormon", category: "Latter-day Saints Canon" },
+  "d&c": { name: "Doctrine & Covenants", category: "Latter-day Saints Canon" },
+  pogp: { name: "Pearl of Great Price", category: "Latter-day Saints Canon" },
+} as Record<
+  keyof typeof availableScriptures,
+  { name: string; category: string }
+>
 
 // Logic
 // ========================================================
 
-type ScriptureRegistry = Partial<
-  Record<keyof typeof availableScriptures, Scripture>
+type ScriptureMap = Partial<
+  Record<keyof typeof availableScriptures, Scripture | undefined>
 >
+
+type ScriptureRegistry = ScriptureMap & { load: any }
+
 const ScripturesContext = createContext<ScriptureRegistry | undefined>(
   undefined
 )
@@ -84,33 +85,30 @@ export function ScripturesProvider({
 }: {
   children: React.ReactNode
 }) {
-  const [scriptures, setScriptures] = useState<ScriptureRegistry | undefined>(
-    undefined
-  )
-  const [count, setCount] = useState(0)
-  useEffect(() => {
-    ;(async () => {
-      const registry = {} as ScriptureRegistry
-      for (const [scriptureId, scripturePath] of availableScripturesMap) {
-        registry[scriptureId as keyof ScriptureRegistry] = await (
-          await fetch(scripturePath)
-        ).json()
-        setCount((c) => c + 1)
+  const [map, setMap] = useState<ScriptureMap>({})
+  const load = useCallback(
+    (id: keyof typeof availableScriptures) => {
+      if (!map[id]) {
+        return (async () => {
+          const fetchedScripture = await (
+            await fetch(availableScriptures[id])
+          ).json()
+          setMap({ ...map, [id]: fetchedScripture })
+          return fetchedScripture
+        })()
       }
-      setScriptures(registry)
-    })()
-  }, [])
+      return (async () => map[id])()
+    },
+    [map]
+  )
+  const scriptures = useMemo(() => ({ ...map, load }), [map, load])
   return (
     <ScripturesContext.Provider value={scriptures}>
-      {scriptures !== undefined ? (
-        children
-      ) : (
-        <Loading value={count} max={availableScripturesMap.length} />
-      )}
+      {children}
     </ScripturesContext.Provider>
   )
 }
 
 export function useScriptures() {
-  return useContext(ScripturesContext) as Required<ScriptureRegistry>
+  return useContext(ScripturesContext) as ScriptureRegistry
 }

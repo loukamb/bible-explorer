@@ -4,7 +4,7 @@ import { LayoutGroup } from "framer-motion"
 
 import Spoiler from "./Spoiler"
 import Verse from "./Verse"
-import { useScriptures } from "./Scripture"
+import { useScriptures, availableScriptureNames } from "./Scripture"
 
 function useHorizontalScroll() {
   const elRef = useRef()
@@ -49,8 +49,10 @@ function App() {
   const scriptures = useScriptures()
   const groups = useMemo(() => {
     const groups = {}
-    for (const [, scripture] of Object.entries(scriptures)) {
-      ;(groups[scripture.category ?? "Other"] ||= []).push(scripture)
+    for (const [id, { name, category }] of Object.entries(
+      availableScriptureNames
+    )) {
+      ;(groups[category ?? "Other"] ||= []).push({ id, name })
     }
     return groups
   }, [scriptures])
@@ -64,8 +66,16 @@ function App() {
   const [verseSearch, setVerseSearch] = useState("")
   const [zoomLevel, setZoomLevel] = useState(1)
   const [barHidden, setBarHidden] = useState(true)
-  const [selectedScripture, setSelectedScripture] = useState("nkjv")
   const scriptureSelector = useRef(null)
+
+  const [selectedScripture, setSelectedScripture_internal] = useState("nkjv")
+  const setSelectedScripture = useCallback((id) => {
+    setSelectedScripture_internal(id)
+    scriptures.load(id)
+  })
+  useEffect(() => {
+    scriptures.load("nkjv")
+  }, [])
 
   const [readyToUpdateState, setReadyToUpdateState] = useState(false)
 
@@ -129,19 +139,28 @@ function App() {
       const [stateIndex, indices] = JSON.parse(
         atob(decodeURIComponent(encodedState))
       )
-      setTabs(
-        indices.map((tab) => ({
-          scripture: scriptures[tab[0]],
-          index: tab[1],
-          book: scriptures[tab[0]].books[tab[1]],
-          chapter: scriptures[tab[0]].books[tab[1]].chapters[tab[2]],
-          id: scriptures[tab[0]].books[tab[1]].id,
-        }))
-      )
-      setSelectedTabIndex(stateIndex)
-      setSelectedScripture(indices[stateIndex][0])
+
+      ;(async () => {
+        const tabs = []
+        for (const tab of indices) {
+          const scripture = await scriptures.load(tab[0])
+          tabs.push({
+            scripture,
+            index: tab[1],
+            book: scripture.books[tab[1]],
+            chapter: scripture.books[tab[1]].chapters[tab[2]],
+            id: scripture.books[tab[1]].id,
+          })
+        }
+
+        setTabs(tabs)
+        setSelectedTabIndex(stateIndex)
+        setSelectedScripture(indices[stateIndex][0])
+        setReadyToUpdateState(true)
+      })()
+    } else {
+      setReadyToUpdateState(true)
     }
-    setReadyToUpdateState(true)
   }, [])
 
   // Update state in URL when updating is ready.
@@ -202,10 +221,10 @@ function App() {
               onChange={(e) => setSelectedScripture(e.target.value)}
             >
               {Object.entries(groups).map(([scriptureGroup, scriptures]) => (
-                <optgroup label={scriptureGroup}>
-                  {Object.entries(scriptures).map(([, scriptureValue]) => (
-                    <option value={scriptureValue.id}>
-                      {scriptureValue.name}
+                <optgroup label={scriptureGroup} key={scriptureGroup}>
+                  {Object.entries(scriptures).map(([, { id, name }]) => (
+                    <option value={id} key={id}>
+                      {name}
                     </option>
                   ))}
                 </optgroup>
@@ -222,33 +241,39 @@ function App() {
             className="w-full bg-inherit placeholder-slate-500 focus:bg-slate-600 hover:bg-slate-600 border-b border-slate-500 outline-none font-sans p-4 transition"
           />
           <div>
-            <LayoutGroup>
-              {scriptures[selectedScripture].books.map(
-                (book) =>
-                  (bookSearch === "" ||
-                    book.name.toLowerCase().includes(bookSearch)) && (
-                    <Spoiler key={book.name} name={book.name}>
-                      {book.chapters.map((chapter, i) => (
-                        <button
-                          key={i + 1}
-                          className="link-to-chapter"
-                          onClick={() => {
-                            addTab(
-                              scriptures[selectedScripture],
-                              book,
-                              chapter,
-                              true
-                            )
-                            setBarHidden(true)
-                          }}
-                        >
-                          {i + 1}
-                        </button>
-                      ))}
-                    </Spoiler>
-                  )
-              )}
-            </LayoutGroup>
+            {scriptures[selectedScripture] ? (
+              <LayoutGroup>
+                {scriptures[selectedScripture].books.map(
+                  (book) =>
+                    (bookSearch === "" ||
+                      book.name.toLowerCase().includes(bookSearch)) && (
+                      <Spoiler key={book.name} name={book.name}>
+                        {book.chapters.map((chapter, i) => (
+                          <button
+                            key={i + 1}
+                            className="link-to-chapter"
+                            onClick={() => {
+                              addTab(
+                                scriptures[selectedScripture],
+                                book,
+                                chapter,
+                                true
+                              )
+                              setBarHidden(true)
+                            }}
+                          >
+                            {i + 1}
+                          </button>
+                        ))}
+                      </Spoiler>
+                    )
+                )}
+              </LayoutGroup>
+            ) : (
+              <div className="flex items-center justify-center">
+                <Icon icon="svg-spinners:180-ring" />
+              </div>
+            )}
           </div>
         </div>
         <main className="flex flex-col h-full w-0 grow">
@@ -263,9 +288,10 @@ function App() {
               ref={tabBar}
               className="whitespace-nowrap overflow-auto scrollbar-none"
             >
+              {!readyToUpdateState && <Icon icon="svg-spinners:180-ring" />}
               {tabs.map((tab, i) => (
                 <Tab
-                  key={`${tab.book.name}:${tab.chapter.num}`}
+                  key={`${tab.scripture.id}:${tab.book.name}:${tab.chapter.num}`}
                   onClick={() => (
                     setSelectedScripture(tab.scripture.id),
                     setSelectedTabIndex(i)
