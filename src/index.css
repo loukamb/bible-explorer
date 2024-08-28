@@ -5,7 +5,7 @@
 html,
 body {
   font-family: "Ensign:Sans";
-  @apply bg-slate-950 text-slate-50;
+  @apply bg-white text-zinc-950;
 }
 
 h1 {
@@ -14,15 +14,15 @@ h1 {
 }
 
 .spoiler-button {
-  @apply cursor-default flex items-center border-y-slate-500 w-full text-left p-4 hover:bg-slate-50/10 transition;
+  @apply cursor-default flex items-center border-y-slate-500 w-full text-left p-4 hover:bg-zinc-50 transition;
 }
 
 .spoiler-contents {
-  @apply bg-slate-950/20 border-slate-500 overflow-hidden;
+  @apply bg-inherit overflow-hidden;
 }
 
 .link-to-chapter {
-  @apply border rounded-full w-8 h-8 flex items-center justify-center cursor-pointer border-slate-500 hover:bg-slate-500 transition text-xs;
+  @apply border rounded-full w-8 h-8 flex items-center justify-center cursor-pointer border-zinc-300 hover:bg-zinc-300 transition text-xs;
 }
 
 .reader {
@@ -32,7 +32,8 @@ h1 {
 
 .verse {
   font-family: "Ensign:Serif";
-  @apply text-xl p-4 hover:bg-slate-800/50 rounded-xl max-w-2xl transition;
+  max-width: var(--verse-width);
+  @apply text-xl p-4 hover:bg-zinc-200/50 rounded-xl transition;
 }
 
 .verse sup {
