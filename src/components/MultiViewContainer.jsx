@@ -18,6 +18,7 @@ export default function MultiViewContainer({
     addTabToView,
     removeTabFromView,
     selectTabInView,
+    duplicateTabInTranslation,
   } = useAppContext()
 
   const containerRef = useRef(null)
@@ -59,6 +60,26 @@ export default function MultiViewContainer({
     }, 0)
   }
 
+  const handleDuplicateInTranslation = (targetScriptureId) => {
+    if (contextMenu.viewId != null && contextMenu.tabIndex != null) {
+      duplicateTabInTranslation(
+        contextMenu.viewId,
+        contextMenu.tabIndex,
+        targetScriptureId
+      )
+    }
+  }
+
+  const getCurrentScriptureId = () => {
+    if (contextMenu.viewId != null && contextMenu.tabIndex != null) {
+      const view = views.find((v) => v.id === contextMenu.viewId)
+      if (view && view.tabs[contextMenu.tabIndex]) {
+        return view.tabs[contextMenu.tabIndex].scripture.id
+      }
+    }
+    return null
+  }
+
   return (
     <div className="h-full w-full flex overflow-hidden">
       <div ref={containerRef} className="flex-1 flex overflow-hidden">
@@ -84,6 +105,8 @@ export default function MultiViewContainer({
         onCloseTab={handleCloseTab}
         onCloseOtherTabs={handleCloseOtherTabs}
         onCloseAllTabs={handleCloseAllTabs}
+        onDuplicateInTranslation={handleDuplicateInTranslation}
+        currentScriptureId={getCurrentScriptureId()}
         canSplit={views.length < 4}
       />
     </div>

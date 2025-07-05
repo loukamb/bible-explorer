@@ -300,11 +300,9 @@ export function AppProvider({ children }) {
       if (views.length > 0) {
         const targetViewId = viewId || getCurrentViewId()
 
-        // Find the target view
         const targetView = views.find((v) => v.id === targetViewId)
         if (!targetView) return
 
-        // Check if the chapter tab already exists
         const existingTabIndex = targetView.tabs.findIndex(
           (tab) =>
             tab.type === "chapter" &&
@@ -314,12 +312,10 @@ export function AppProvider({ children }) {
         )
 
         if (existingTabIndex !== -1) {
-          // Switch to the existing chapter tab
           selectTabInView(targetViewId, existingTabIndex)
           return
         }
 
-        // Create new chapter tab if it doesn't exist
         const tab = {
           type: "chapter",
           book,
@@ -332,6 +328,47 @@ export function AppProvider({ children }) {
       }
     },
     [views, addTabToView, getCurrentViewId, selectTabInView]
+  )
+
+  const duplicateTabInTranslation = useCallback(
+    async (viewId, tabIndex, targetScriptureId) => {
+      const sourceView = views.find((v) => v.id === viewId)
+      if (!sourceView) return
+
+      const sourceTab = sourceView.tabs[tabIndex]
+      if (!sourceTab) return
+
+      const targetScripture = await scriptures.load(targetScriptureId)
+
+      const targetBook = targetScripture.books.find(
+        (book) => book.name === sourceTab.book.name
+      )
+      if (!targetBook) return
+
+      const targetChapter = targetBook.chapters.find(
+        (chapter) => chapter.num === sourceTab.chapter.num
+      )
+      if (!targetChapter) return
+
+      if (sourceTab.type === "verse") {
+        const targetVerse = targetChapter.verses.find(
+          (verse) => verse.num === sourceTab.verse.num
+        )
+        if (!targetVerse) return
+
+        addVerseTab(
+          targetScripture,
+          targetBook,
+          targetChapter,
+          targetVerse,
+          true,
+          viewId
+        )
+      } else if (sourceTab.type === "chapter") {
+        addChapterTab(targetScripture, targetBook, targetChapter, true, viewId)
+      }
+    },
+    [views, scriptures, addVerseTab, addChapterTab]
   )
 
   function compressTab(tab) {
@@ -609,6 +646,7 @@ export function AppProvider({ children }) {
     selectTabInView,
     reorderTabsInView,
     splitTabToNewView,
+    duplicateTabInTranslation,
     resizeView,
     resizeViewsBetween,
     removeView,

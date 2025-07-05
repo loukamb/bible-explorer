@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Icon } from "@iconify/react"
+import TranslationSubmenu from "./TranslationSubmenu"
 
 export default function TabContextMenu({
   isOpen,
@@ -9,6 +10,8 @@ export default function TabContextMenu({
   onCloseTab,
   onCloseOtherTabs,
   onCloseAllTabs,
+  onDuplicateInTranslation,
+  currentScriptureId,
   canSplit = true,
   canClose = true,
   canCloseOthers = true,
@@ -51,22 +54,6 @@ export default function TabContextMenu({
         top: position.y,
       }}
     >
-      {canSplit && (
-        <button
-          onClick={() => {
-            onSplitIntoView()
-            onClose()
-          }}
-          className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
-        >
-          <Icon
-            icon="fluent:split-horizontal-24-regular"
-            className="text-gray-600"
-          />
-          Split into view
-        </button>
-      )}
-
       {canClose && (
         <button
           onClick={() => {
@@ -105,11 +92,52 @@ export default function TabContextMenu({
           className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
         >
           <Icon
-            icon="fluent:dismiss-square-16-regular"
+            icon="fluent:dismiss-square-24-regular"
             className="text-gray-600"
           />
           Close all tabs
         </button>
+      )}
+
+      {canSplit && (
+        <button
+          onClick={() => {
+            onSplitIntoView()
+            onClose()
+          }}
+          className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
+        >
+          <Icon
+            icon="fluent:split-horizontal-24-regular"
+            className="text-gray-600"
+          />
+          Split into view
+        </button>
+      )}
+
+      {onDuplicateInTranslation && currentScriptureId && (
+        <div className="group relative">
+          <button className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2 justify-between">
+            <div className="flex items-center gap-2">
+              <Icon
+                icon="fluent:document-copy-24-regular"
+                className="text-gray-600"
+              />
+              Duplicate
+            </div>
+            <Icon
+              icon="fluent:chevron-right-12-regular"
+              className="text-gray-600"
+            />
+          </button>
+          <div className="absolute left-full top-0 ml-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 pointer-events-none group-hover:pointer-events-auto">
+            <TranslationSubmenu
+              onSelectTranslation={onDuplicateInTranslation}
+              onClose={onClose}
+              currentScriptureId={currentScriptureId}
+            />
+          </div>
+        </div>
       )}
     </div>
   )
