@@ -1,14 +1,8 @@
-import React from "react"
 import { Icon } from "@iconify/react"
 import { useAppContext } from "./AppContext"
 import TabBar from "./TabBar"
 
-export default function GlobalHeader({
-  showTabs = false,
-  onTabContextMenu,
-  dragIndex,
-  dragOverIndex,
-}) {
+export default function GlobalHeader({ showTabs = false, onTabContextMenu }) {
   const {
     views,
     selectTabInView,
@@ -41,8 +35,6 @@ export default function GlobalHeader({
           onTabReorder={(from, to) =>
             reorderTabsInView(singleView.id, from, to)
           }
-          dragIndex={dragIndex}
-          dragOverIndex={dragOverIndex}
           onTabContextMenu={onTabContextMenu}
           viewId={singleView.id}
         />

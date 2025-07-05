@@ -7,6 +7,7 @@ import {
   useEffect,
   useMemo,
 } from "react"
+
 import { useScriptures, availableScriptureNames } from "./Scripture"
 
 const AppContext = createContext()
@@ -21,6 +22,20 @@ export function useAppContext() {
 
 export function AppProvider({ children }) {
   const scriptures = useScriptures()
+  useEffect(() => {
+    scriptures.load("nkjv")
+  }, [scriptures])
+
+  const [bookSearch, setBookSearch] = useState("")
+  const [barHidden, setBarHidden] = useState(true)
+  const [scrollLevel, setScrollLevel] = useState(0)
+  const [zoomLevel, setZoomLevel] = useState(1)
+  const [verseWidth, setVerseWidth] = useState(1)
+  const [readyToUpdateState, setReadyToUpdateState] = useState(false)
+  const scriptureReader = useRef(null)
+
+  // Views
+  // =========================================================
 
   const [views, setViews] = useState([
     {
@@ -31,20 +46,72 @@ export function AppProvider({ children }) {
     },
   ])
 
-  const findViewIndex = useCallback(
-    (viewId) => views.findIndex((v) => v.id === viewId),
-    [views]
-  )
-
   const getCurrentViewId = useCallback(() => {
-    // If there's only one view, return its ID
     if (views.length === 1) {
       return views[0].id
     }
-    // Find the view that has a selected tab (is active)
     const activeView = views.find((v) => v.selectedTabIndex !== undefined)
     return activeView ? activeView.id : views[0]?.id
   }, [views])
+
+  const resizeViewsBetween = useCallback(
+    (leftViewId, rightViewId, leftViewNewWidth) => {
+      setViews((prev) => {
+        const minWidth = 0.1
+        const leftIdx = prev.findIndex((v) => v.id === leftViewId)
+        const rightIdx = prev.findIndex((v) => v.id === rightViewId)
+
+        if (leftIdx === -1 || rightIdx === -1 || leftIdx >= rightIdx)
+          return prev
+
+        let viewsCopy = prev.map((v) => ({ ...v }))
+
+        viewsCopy[leftIdx].width = Math.max(minWidth, leftViewNewWidth)
+        const totalOtherWidth = viewsCopy.reduce(
+          (sum, v, i) =>
+            i !== leftIdx && i !== rightIdx ? sum + (v.width || 0) : sum,
+          0
+        )
+        const rightViewWidth = Math.max(
+          minWidth,
+          1 - leftViewNewWidth - totalOtherWidth
+        )
+        viewsCopy[rightIdx].width = rightViewWidth
+
+        return viewsCopy
+      })
+    },
+    []
+  )
+
+  const resizeView = useCallback(
+    (viewId, newWidth) => {
+      const idx = views.findIndex((v) => v.id === viewId)
+      if (idx === -1) return
+
+      const nextView = views[idx + 1]
+      if (nextView) {
+        resizeViewsBetween(viewId, nextView.id, newWidth)
+      } else {
+        const prevView = views[idx - 1]
+        if (prevView) {
+          const totalOtherWidth = views.reduce(
+            (sum, v, i) =>
+              i !== idx && i !== idx - 1 ? sum + (v.width || 0) : sum,
+            0
+          )
+          const prevViewWidth = Math.max(0.1, 1 - newWidth - totalOtherWidth)
+          resizeViewsBetween(prevView.id, viewId, prevViewWidth)
+        }
+      }
+    },
+    [resizeViewsBetween, views]
+  )
+
+  const removeView = useCallback((viewId) => {
+    setViews((prev) => prev.filter((v) => v.id !== viewId))
+  }, [])
+
   const addTabToView = useCallback((viewId, tab, focus = true) => {
     setViews((prev) => {
       const newViews = prev.map((view) => {
@@ -67,6 +134,7 @@ export function AppProvider({ children }) {
       return newViews
     })
   }, [])
+
   const removeTabFromView = useCallback((viewId, tabIndex) => {
     setViews((prev) => {
       let newViews = prev.map((view) => {
@@ -102,6 +170,7 @@ export function AppProvider({ children }) {
       return newViews
     })
   }, [])
+
   const selectTabInView = useCallback((viewId, tabIndex) => {
     setViews((prev) =>
       prev.map((view) =>
@@ -109,6 +178,7 @@ export function AppProvider({ children }) {
       )
     )
   }, [])
+
   const reorderTabsInView = useCallback((viewId, fromIndex, toIndex) => {
     setViews((prev) =>
       prev.map((view) => {
@@ -138,6 +208,7 @@ export function AppProvider({ children }) {
       })
     )
   }, [])
+
   const splitTabToNewView = useCallback((viewId, tabIndex) => {
     setViews((prev) => {
       const sourceView = prev.find((v) => v.id === viewId)
@@ -182,61 +253,6 @@ export function AppProvider({ children }) {
       return [...updatedViews, newView]
     })
   }, [])
-  const resizeViewsBetween = useCallback(
-    (leftViewId, rightViewId, leftViewNewWidth) => {
-      setViews((prev) => {
-        const minWidth = 0.1
-        const leftIdx = prev.findIndex((v) => v.id === leftViewId)
-        const rightIdx = prev.findIndex((v) => v.id === rightViewId)
-
-        if (leftIdx === -1 || rightIdx === -1 || leftIdx >= rightIdx)
-          return prev
-
-        let viewsCopy = prev.map((v) => ({ ...v }))
-
-        viewsCopy[leftIdx].width = Math.max(minWidth, leftViewNewWidth)
-        const totalOtherWidth = viewsCopy.reduce(
-          (sum, v, i) =>
-            i !== leftIdx && i !== rightIdx ? sum + (v.width || 0) : sum,
-          0
-        )
-        const rightViewWidth = Math.max(
-          minWidth,
-          1 - leftViewNewWidth - totalOtherWidth
-        )
-        viewsCopy[rightIdx].width = rightViewWidth
-
-        return viewsCopy
-      })
-    },
-    []
-  )
-  const resizeView = useCallback(
-    (viewId, newWidth) => {
-      const idx = views.findIndex((v) => v.id === viewId)
-      if (idx === -1) return
-
-      const nextView = views[idx + 1]
-      if (nextView) {
-        resizeViewsBetween(viewId, nextView.id, newWidth)
-      } else {
-        const prevView = views[idx - 1]
-        if (prevView) {
-          const totalOtherWidth = views.reduce(
-            (sum, v, i) =>
-              i !== idx && i !== idx - 1 ? sum + (v.width || 0) : sum,
-            0
-          )
-          const prevViewWidth = Math.max(0.1, 1 - newWidth - totalOtherWidth)
-          resizeViewsBetween(prevView.id, viewId, prevViewWidth)
-        }
-      }
-    },
-    [resizeViewsBetween, views]
-  )
-  const removeView = useCallback((viewId) => {
-    setViews((prev) => prev.filter((v) => v.id !== viewId))
-  }, [])
 
   const [selectedScripture, setSelectedScripture_internal] = useState("nkjv")
   const setSelectedScripture = useCallback(
@@ -247,20 +263,6 @@ export function AppProvider({ children }) {
     [scriptures]
   )
 
-  const [bookSearch, setBookSearch] = useState("")
-  const [barHidden, setBarHidden] = useState(true)
-  const scriptureReader = useRef(null)
-
-  const [scrollLevel, setScrollLevel] = useState(0)
-  const [zoomLevel, setZoomLevel] = useState(1)
-  const [verseWidth, setVerseWidth] = useState(1)
-
-  const [bookmarks, setBookmarks] = useState([])
-
-  const [readyToUpdateState, setReadyToUpdateState] = useState(false)
-
-  const [dragIndex, setDragIndex] = useState(null)
-  const [dragOverIndex, setDragOverIndex] = useState(null)
   const groups = useMemo(() => {
     const groups = {}
     for (const [id, { name, category }] of Object.entries(
@@ -270,28 +272,9 @@ export function AppProvider({ children }) {
     }
     return groups
   }, [])
-  const [storageMode, setStorageModeState] = useState(() => {
-    return localStorage.getItem("bible-explorer-storage-mode") || "url"
-  })
-  const setStorageMode = (mode) => {
-    setStorageModeState(mode)
-    localStorage.setItem("bible-explorer-storage-mode", mode)
-  }
 
-  const addBookmark = useCallback((bookmark) => {
-    setBookmarks((prevBookmarks) => {
-      const exists = prevBookmarks.some(
-        (b) =>
-          b.scriptureId === bookmark.scriptureId &&
-          b.bookName === bookmark.bookName &&
-          b.chapterNum === bookmark.chapterNum &&
-          b.verseNum === bookmark.verseNum
-      )
-      if (exists) return prevBookmarks
-      const { timestamp, ...bookmarkNoTimestamp } = bookmark
-      return [...prevBookmarks, bookmarkNoTimestamp]
-    })
-  }, [])
+  // Tabs
+  // =========================================================
 
   const addVerseTab = useCallback(
     (scripture, book, chapter, verse, focus = true, viewId = null) => {
@@ -350,43 +333,7 @@ export function AppProvider({ children }) {
     },
     [views, addTabToView, getCurrentViewId, selectTabInView]
   )
-  const removeBookmark = useCallback((bookmark) => {
-    setBookmarks((prevBookmarks) =>
-      prevBookmarks.filter(
-        (b) =>
-          !(
-            b.scriptureId === bookmark.scriptureId &&
-            b.bookName === bookmark.bookName &&
-            b.chapterNum === bookmark.chapterNum &&
-            b.verseNum === bookmark.verseNum
-          )
-      )
-    )
-  }, [])
-  const isBookmarked = useCallback(
-    (scriptureId, bookName, chapterNum, verseNum) => {
-      return bookmarks.some(
-        (b) =>
-          b.scriptureId === scriptureId &&
-          b.bookName === bookName &&
-          b.chapterNum === chapterNum &&
-          b.verseNum === verseNum
-      )
-    },
-    [bookmarks]
-  )
-  const copyVerseText = useCallback(async (text) => {
-    try {
-      await navigator.clipboard.writeText(text)
-    } catch (err) {
-      const textArea = document.createElement("textarea")
-      textArea.value = text
-      document.body.appendChild(textArea)
-      textArea.select()
-      document.execCommand("copy")
-      document.body.removeChild(textArea)
-    }
-  }, [])
+
   function compressTab(tab) {
     if (tab.type === "chapter") {
       return [
@@ -407,6 +354,7 @@ export function AppProvider({ children }) {
       ]
     }
   }
+
   async function decompressTab(tab) {
     const scripture = await scriptures.load(tab[1])
     const book = scripture.books[tab[2]]
@@ -434,10 +382,75 @@ export function AppProvider({ children }) {
       }
     }
   }
-  useEffect(() => {
-    scriptures.load("nkjv")
-  }, [scriptures])
-  const getSettingsObject = () => ({
+
+  // Bookmarks
+  // =========================================================
+
+  const [bookmarks, setBookmarks] = useState([])
+
+  const addBookmark = useCallback((bookmark) => {
+    setBookmarks((prevBookmarks) => {
+      const exists = prevBookmarks.some(
+        (b) =>
+          b.scriptureId === bookmark.scriptureId &&
+          b.bookName === bookmark.bookName &&
+          b.chapterNum === bookmark.chapterNum &&
+          b.verseNum === bookmark.verseNum
+      )
+      if (exists) return prevBookmarks
+      const { timestamp, ...bookmarkNoTimestamp } = bookmark
+      return [...prevBookmarks, bookmarkNoTimestamp]
+    })
+  }, [])
+
+  const removeBookmark = useCallback((bookmark) => {
+    setBookmarks((prevBookmarks) =>
+      prevBookmarks.filter(
+        (b) =>
+          !(
+            b.scriptureId === bookmark.scriptureId &&
+            b.bookName === bookmark.bookName &&
+            b.chapterNum === bookmark.chapterNum &&
+            b.verseNum === bookmark.verseNum
+          )
+      )
+    )
+  }, [])
+
+  const isBookmarked = useCallback(
+    (scriptureId, bookName, chapterNum, verseNum) => {
+      return bookmarks.some(
+        (b) =>
+          b.scriptureId === scriptureId &&
+          b.bookName === bookName &&
+          b.chapterNum === chapterNum &&
+          b.verseNum === verseNum
+      )
+    },
+    [bookmarks]
+  )
+
+  const copyVerseText = useCallback(async (text) => {
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch (err) {
+      const textArea = document.createElement("textarea")
+      textArea.value = text
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand("copy")
+      document.body.removeChild(textArea)
+    }
+  }, [])
+
+  // Storage & Settings
+  // =========================================================
+
+  const [storageMode, setStorageModeState] = useState(() => {
+    return localStorage.getItem("bible-explorer-storage-mode") || "url"
+  })
+
+  const serializeSettings = () => ({
     views: views.map((view) => ({
       ...view,
       tabs: view.tabs.map(compressTab),
@@ -449,7 +462,8 @@ export function AppProvider({ children }) {
     verseWidth,
     bookmarks,
   })
-  const applySettingsObject = async (obj) => {
+
+  const deserializeSettings = async (obj) => {
     const loadedViews = []
     for (const view of obj.views || []) {
       const loadedTabs = []
@@ -467,6 +481,32 @@ export function AppProvider({ children }) {
     setVerseWidth(obj.verseWidth ?? 1)
     setBookmarks(obj.bookmarks ?? [])
   }
+
+  const setStorageMode = (mode) => {
+    setStorageModeState(mode)
+    localStorage.setItem("bible-explorer-storage-mode", mode)
+  }
+
+  const migrateStorage = useCallback(
+    (toMode) => {
+      const obj = JSON.stringify(serializeSettings())
+      if (toMode === "local") {
+        localStorage.setItem("bible-explorer-settings", obj)
+      } else if (toMode === "url") {
+        const url = new URL(window.location.href)
+        url.hash = ""
+        url.searchParams.set("state", encodeURIComponent(btoa(obj)))
+        history.replaceState(null, "", url)
+      }
+      setStorageMode(toMode)
+    },
+    [views, zoomLevel, verseWidth, bookmarks]
+  )
+
+  // Effects
+  // =========================================================
+
+  // Initial load.
   useEffect(() => {
     let cancelled = false
     const load = async () => {
@@ -475,7 +515,7 @@ export function AppProvider({ children }) {
         if (saved) {
           try {
             const obj = JSON.parse(saved)
-            await applySettingsObject(obj)
+            await deserializeSettings(obj)
           } catch {}
         }
       } else if (storageMode === "url") {
@@ -483,7 +523,7 @@ export function AppProvider({ children }) {
         if (encoded != undefined) {
           try {
             const obj = JSON.parse(atob(decodeURIComponent(encoded)))
-            await applySettingsObject(obj)
+            await deserializeSettings(obj)
           } catch {}
         }
       }
@@ -494,9 +534,11 @@ export function AppProvider({ children }) {
       cancelled = true
     }
   }, [storageMode])
+
+  // Save state to storage.
   useEffect(() => {
     if (!readyToUpdateState) return
-    const obj = getSettingsObject()
+    const obj = serializeSettings()
     if (storageMode === "local") {
       try {
         localStorage.setItem("bible-explorer-settings", JSON.stringify(obj))
@@ -511,27 +553,8 @@ export function AppProvider({ children }) {
       history.replaceState(null, "", url)
     }
   }, [storageMode, readyToUpdateState, views, zoomLevel, verseWidth, bookmarks])
-  const migrateStorage = useCallback(
-    (toMode) => {
-      const obj = getSettingsObject()
-      if (toMode === "local") {
-        localStorage.setItem("bible-explorer-settings", JSON.stringify(obj))
-      } else if (toMode === "url") {
-        const url = new URL(window.location.href)
-        url.hash = ""
-        url.searchParams.set(
-          "state",
-          encodeURIComponent(btoa(JSON.stringify(obj)))
-        )
-        history.replaceState(null, "", url)
-      }
-    },
-    [views, zoomLevel, verseWidth, bookmarks]
-  )
-  const handleSetStorageMode = (mode) => {
-    migrateStorage(mode)
-    setStorageMode(mode)
-  }
+
+  // Listen to the scroll positions of the scripture reader.
   useEffect(() => {
     const onScroll = (e) => {
       setViews((views) =>
@@ -558,6 +581,8 @@ export function AppProvider({ children }) {
       }
     }
   }, [scriptureReader.current])
+
+  // Sync the scroll positions of the scripture reader with the tabs.
   useEffect(() => {
     if (
       views[views.findIndex((v) => v.selectedTabIndex !== undefined)]?.tabs[
@@ -595,8 +620,6 @@ export function AppProvider({ children }) {
     zoomLevel,
     verseWidth,
     readyToUpdateState,
-    dragIndex,
-    dragOverIndex,
     groups,
     storageMode,
     settingsSidebarOpen,
@@ -608,7 +631,7 @@ export function AppProvider({ children }) {
     setScrollLevel,
     setZoomLevel,
     setVerseWidth,
-    setStorageMode: handleSetStorageMode,
+    migrateStorage,
     setSettingsSidebarOpen,
     addBookmark,
     removeBookmark,

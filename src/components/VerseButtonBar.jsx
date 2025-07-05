@@ -1,3 +1,4 @@
+import { useCallback } from "react"
 import { Icon } from "@iconify/react"
 import { useAppContext } from "./AppContext"
 
@@ -14,7 +15,7 @@ export default function VerseButtonBar({
 
   const bookmarked = isBookmarked(scriptureId, bookName, chapterNum, verseNum)
 
-  const handleBookmarkToggle = () => {
+  const handleBookmarkToggle = useCallback(() => {
     const bookmark = {
       scriptureId,
       bookName,
@@ -28,11 +29,20 @@ export default function VerseButtonBar({
     } else {
       addBookmark(bookmark)
     }
-  }
+  }, [
+    bookmarked,
+    addBookmark,
+    removeBookmark,
+    scriptureId,
+    bookName,
+    chapterNum,
+    verseNum,
+    verseText,
+  ])
 
-  const handleCopy = () => {
+  const handleCopy = useCallback(() => {
     copyVerseText(verseText)
-  }
+  }, [verseText, copyVerseText])
 
   return (
     <div className="absolute top-full left-1/2 -translate-x-1/2 flex gap-1 p-1 bg-white/90 backdrop-blur-sm rounded shadow-lg border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">

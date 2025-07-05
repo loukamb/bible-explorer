@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState } from "react"
 import { useAppContext } from "./AppContext"
 import View from "./View"
 import TabContextMenu from "./TabContextMenu"
@@ -19,9 +19,12 @@ export default function MultiViewContainer({
     removeTabFromView,
     selectTabInView,
   } = useAppContext()
+
   const containerRef = useRef(null)
   const [containerWidth, setContainerWidth] = useState(0)
   const [containerLeft, setContainerLeft] = useState(0)
+
+  // Update the container width and left on resize
   useEffect(() => {
     if (!containerRef.current) return
     const updateRect = () => {
@@ -37,6 +40,7 @@ export default function MultiViewContainer({
       window.removeEventListener("resize", updateRect)
     }
   }, [])
+
   const handleTabDropBetweenViews = (
     fromViewId,
     fromIndex,

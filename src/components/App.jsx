@@ -1,38 +1,14 @@
-import { useRef, useEffect, useState } from "react"
+import { useState, useCallback } from "react"
+
 import { AppProvider, useAppContext } from "./AppContext"
 import Sidebar from "./Sidebar"
 import MultiViewContainer from "./MultiViewContainer"
 import SettingsSidebar from "./SettingsSidebar"
 import GlobalHeader from "./GlobalHeader"
-import { Icon } from "@iconify/react"
-
-function useHorizontalScroll() {
-  const elRef = useRef()
-  useEffect(() => {
-    const el = elRef.current
-    if (el) {
-      const onWheel = (e) => {
-        if (e.deltaY == 0) return
-        e.preventDefault()
-        el.scrollBy(e.deltaY, 0)
-      }
-      el.addEventListener("wheel", onWheel)
-      return () => el.removeEventListener("wheel", onWheel)
-    }
-  }, [])
-  return elRef
-}
 
 function AppContent() {
-  const {
-    views,
-    setViews,
-    selectTabInView,
-    removeTabFromView,
-    reorderTabsInView,
-    splitTabToNewView,
-    resizeView,
-  } = useAppContext()
+  const { views, setViews, removeTabFromView, splitTabToNewView } =
+    useAppContext()
 
   const [contextMenu, setContextMenu] = useState({
     isOpen: false,
@@ -41,31 +17,36 @@ function AppContent() {
     viewId: null,
   })
 
-  const handleTabContextMenu = (e, viewId, tabIndex) => {
+  const handleTabContextMenu = useCallback((e, viewId, tabIndex) => {
     e.preventDefault()
-    setContextMenu({
+    setContextMenu((prev) => ({
+      ...prev,
       isOpen: true,
       position: { x: e.clientX, y: e.clientY },
       viewId,
       tabIndex,
-    })
-  }
+    }))
+  }, [])
 
-  const closeContextMenu = () =>
+  const closeContextMenu = useCallback(() => {
     setContextMenu((prev) => ({ ...prev, isOpen: false }))
-  const handleSplitTab = () => {
+  }, [])
+
+  const handleSplitTab = useCallback(() => {
     if (contextMenu.viewId != null && contextMenu.tabIndex != null) {
       splitTabToNewView(contextMenu.viewId, contextMenu.tabIndex)
       closeContextMenu()
     }
-  }
-  const handleCloseTab = () => {
+  }, [contextMenu, splitTabToNewView, closeContextMenu])
+
+  const handleCloseTab = useCallback(() => {
     if (contextMenu.viewId != null && contextMenu.tabIndex != null) {
       removeTabFromView(contextMenu.viewId, contextMenu.tabIndex)
       closeContextMenu()
     }
-  }
-  const handleCloseOtherTabs = () => {
+  }, [contextMenu, removeTabFromView, closeContextMenu])
+
+  const handleCloseOtherTabs = useCallback(() => {
     if (contextMenu.viewId != null && contextMenu.tabIndex != null) {
       setViews((prev) =>
         prev.map((view) =>
@@ -80,8 +61,9 @@ function AppContent() {
       )
       closeContextMenu()
     }
-  }
-  const handleCloseAllTabs = () => {
+  }, [contextMenu, setViews, closeContextMenu])
+
+  const handleCloseAllTabs = useCallback(() => {
     if (contextMenu.viewId != null) {
       setViews((prev) =>
         prev.map((view) =>
@@ -92,7 +74,7 @@ function AppContent() {
       )
       closeContextMenu()
     }
-  }
+  }, [contextMenu, setViews, closeContextMenu])
 
   return (
     <div className="h-screen w-screen max-w-[100vw] max-h-screen flex">

@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { Icon } from "@iconify/react"
 import Tab from "./Tab"
 
 export default function TabBar({
@@ -9,8 +8,6 @@ export default function TabBar({
   onTabRemove,
   onTabReorder,
   onTabDropBetweenViews,
-  dragIndex,
-  dragOverIndex,
   onTabContextMenu,
   viewId,
 }) {

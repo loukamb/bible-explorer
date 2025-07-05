@@ -3,7 +3,7 @@ import { useAppContext } from "./AppContext"
 import Verse from "./Verse"
 
 export default function ChapterTab({ tab, viewId }) {
-  const { zoomLevel, verseWidth } = useAppContext()
+  const { verseWidth } = useAppContext()
   const [verseSearch, setVerseSearch] = useState("")
 
   return (

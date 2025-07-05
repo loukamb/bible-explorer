@@ -1,3 +1,4 @@
+import { useCallback } from "react"
 import { useAppContext } from "./AppContext"
 import Spoiler from "./Spoiler"
 import { Icon } from "@iconify/react"
@@ -12,7 +13,7 @@ export default function BookmarksSection() {
     getCurrentViewId,
   } = useAppContext()
 
-  const handleBookmarkClick = (bookmark) => {
+  const handleBookmarkClick = useCallback((bookmark) => {
     const scripture = scriptures[bookmark.scriptureId]
     if (!scripture) return
 
@@ -27,11 +28,7 @@ export default function BookmarksSection() {
 
     addVerseTab(scripture, book, chapter, verse, true, getCurrentViewId())
     setBarHidden(true)
-  }
-
-  const handleRemoveBookmark = (bookmark) => {
-    removeBookmark(bookmark)
-  }
+  }, [])
 
   if (bookmarks.length === 0) {
     return (
@@ -51,7 +48,7 @@ export default function BookmarksSection() {
       <div className="space-y-2">
         {bookmarks
           .sort((a, b) => b.timestamp - a.timestamp)
-          .map((bookmark, index) => (
+          .map((bookmark) => (
             <div
               key={`${bookmark.scriptureId}-${bookmark.bookName}-${bookmark.chapterNum}-${bookmark.verseNum}`}
               className="group relative flex flex-col bg-white rounded border border-gray-200 hover:border-gray-300 transition-colors overflow-hidden"
@@ -70,7 +67,7 @@ export default function BookmarksSection() {
                 </div>
               </button>
               <button
-                onClick={() => handleRemoveBookmark(bookmark)}
+                onClick={() => removeBookmark(bookmark)}
                 className="absolute top-2 right-2 p-1 hover:bg-red-50 rounded z-10 opacity-0 group-hover:opacity-100 transition-opacity"
                 title="Remove bookmark"
                 tabIndex={0}

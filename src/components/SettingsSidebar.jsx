@@ -3,7 +3,7 @@ import { useAppContext } from "./AppContext"
 export default function SettingsSidebar() {
   const {
     storageMode,
-    setStorageMode,
+    migrateStorage,
     settingsSidebarOpen,
     setSettingsSidebarOpen,
   } = useAppContext()
@@ -43,7 +43,7 @@ export default function SettingsSidebar() {
                 name="storageMode"
                 value="url"
                 checked={storageMode === "url"}
-                onChange={() => setStorageMode("url")}
+                onChange={() => migrateStorage("url")}
               />
               URL-based (default)
             </label>
@@ -53,7 +53,7 @@ export default function SettingsSidebar() {
                 name="storageMode"
                 value="local"
                 checked={storageMode === "local"}
-                onChange={() => setStorageMode("local")}
+                onChange={() => migrateStorage("local")}
               />
               LocalStorage
             </label>

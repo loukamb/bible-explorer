@@ -1,9 +1,8 @@
+import { useCallback } from "react"
 import { useAppContext } from "./AppContext"
-import { Icon } from "@iconify/react"
 import VerseButtonBar from "./VerseButtonBar"
 
 export default function Verse({
-  id,
   num,
   children,
   width,
@@ -16,7 +15,7 @@ export default function Verse({
   const { addVerseTab, setBarHidden, scriptures, selectedScripture } =
     useAppContext()
 
-  const handleAddVerseTab = () => {
+  const handleAddVerseTab = useCallback(() => {
     if (book && chapter && verseObj) {
       addVerseTab(
         scriptures[selectedScripture],
@@ -28,7 +27,15 @@ export default function Verse({
       )
       setBarHidden(true)
     }
-  }
+  }, [
+    book,
+    chapter,
+    verseObj,
+    selectedScripture,
+    viewId,
+    addVerseTab,
+    setBarHidden,
+  ])
 
   return (
     <div

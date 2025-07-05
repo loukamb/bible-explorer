@@ -1,5 +1,4 @@
-import React, { useRef, useState, useEffect } from "react"
-import { Icon } from "@iconify/react"
+import { useRef, useState, useEffect, useCallback, useMemo } from "react"
 import { useAppContext } from "./AppContext"
 import TabBar from "./TabBar"
 import ChapterTab from "./ChapterTab"
@@ -11,8 +10,6 @@ export default function View({
   onResize,
   containerWidth,
   containerLeft,
-  dragIndex,
-  dragOverIndex,
   onTabContextMenu,
   showTabBar,
   onTabDropBetweenViews,
@@ -22,67 +19,79 @@ export default function View({
   const resizeRef = useRef(null)
   const [isDragging, setIsDragging] = useState(false)
 
-  const view = views.find((v) => v.id === viewId)
-  if (!view) return null
+  const view = useMemo(
+    () => views.find((v) => v.id === viewId),
+    [views, viewId]
+  )
+  if (!view) {
+    return null
+  }
+
   const { tabs, selectedTabIndex } = view
   const selectedTab = tabs[selectedTabIndex]
 
-  const handleMouseDown = (e) => {
+  const handleMouseDown = useCallback((e) => {
     if (!resizeRef.current) return
     setIsDragging(true)
     e.preventDefault()
-  }
+  }, [])
 
-  const handleMouseMove = (e) => {
-    if (!isDragging || !resizeRef.current || !containerWidth) return
-    const mouseX = e.clientX
-    const newPixelWidth = mouseX - (containerLeft || 0)
-    let newWidthFraction = newPixelWidth / containerWidth
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (!isDragging || !resizeRef.current || !containerWidth) return
+      const mouseX = e.clientX
+      const newPixelWidth = mouseX - (containerLeft || 0)
+      let newWidthFraction = newPixelWidth / containerWidth
 
-    const currentIndex = views.findIndex((v) => v.id === viewId)
-    const nextView = views[currentIndex + 1]
+      const currentIndex = views.findIndex((v) => v.id === viewId)
+      const nextView = views[currentIndex + 1]
 
-    if (nextView && typeof onResize === "function") {
-      const leftViewsWidth = views
-        .slice(0, currentIndex)
-        .reduce((sum, v) => sum + (v.width || 0), 0)
+      if (nextView && typeof onResize === "function") {
+        const leftViewsWidth = views
+          .slice(0, currentIndex)
+          .reduce((sum, v) => sum + (v.width || 0), 0)
 
-      const newLeftViewWidth = Math.max(0.1, newWidthFraction - leftViewsWidth)
+        const newLeftViewWidth = Math.max(
+          0.1,
+          newWidthFraction - leftViewsWidth
+        )
 
-      const otherViewsWidth = views.reduce(
-        (sum, v, i) =>
-          i !== currentIndex && i !== currentIndex + 1
-            ? sum + (v.width || 0)
-            : sum,
-        0
-      )
-
-      const maxWidth = 1 - otherViewsWidth - 0.1
-      const clampedWidth = Math.min(maxWidth, Math.max(0.1, newLeftViewWidth))
-
-      onResize(viewId, nextView.id, clampedWidth)
-    } else if (typeof onResize === "function") {
-      const prevView = views[currentIndex - 1]
-      if (prevView) {
-        const totalOtherWidth = views.reduce(
+        const otherViewsWidth = views.reduce(
           (sum, v, i) =>
-            i !== currentIndex && i !== currentIndex - 1
+            i !== currentIndex && i !== currentIndex + 1
               ? sum + (v.width || 0)
               : sum,
           0
         )
-        const prevViewWidth = Math.max(
-          0.1,
-          1 - newWidthFraction - totalOtherWidth
-        )
-        onResize(prevView.id, viewId, prevViewWidth)
-      }
-    }
-  }
 
-  const handleMouseUp = () => {
+        const maxWidth = 1 - otherViewsWidth - 0.1
+        const clampedWidth = Math.min(maxWidth, Math.max(0.1, newLeftViewWidth))
+
+        onResize(viewId, nextView.id, clampedWidth)
+      } else if (typeof onResize === "function") {
+        const prevView = views[currentIndex - 1]
+        if (prevView) {
+          const totalOtherWidth = views.reduce(
+            (sum, v, i) =>
+              i !== currentIndex && i !== currentIndex - 1
+                ? sum + (v.width || 0)
+                : sum,
+            0
+          )
+          const prevViewWidth = Math.max(
+            0.1,
+            1 - newWidthFraction - totalOtherWidth
+          )
+          onResize(prevView.id, viewId, prevViewWidth)
+        }
+      }
+    },
+    [isDragging, containerWidth, containerLeft, viewId, onResize]
+  )
+
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false)
-  }
+  }, [])
 
   useEffect(() => {
     if (isDragging) {
@@ -114,8 +123,6 @@ export default function View({
           onTabRemove={(i) => removeTabFromView(viewId, i)}
           onTabReorder={(from, to) => reorderTabsInView(viewId, from, to)}
           onTabDropBetweenViews={onTabDropBetweenViews}
-          dragIndex={dragIndex}
-          dragOverIndex={dragOverIndex}
           onTabContextMenu={onTabContextMenu}
           viewId={viewId}
         />
