@@ -6,9 +6,6 @@ import {
   useMemo,
 } from "react"
 
-// Definitions
-// ========================================================
-
 interface Scripture {
   readonly id: string
   readonly name: string
@@ -31,9 +28,6 @@ interface ScriptureVerse {
   readonly num: number
   readonly text: string
 }
-
-// Paths to available scriptures
-// ========================================================
 
 const availableScriptures = {
   nkjv: "/scriptures/bible/nkjv.json",
@@ -66,9 +60,6 @@ export const availableScriptureNames = {
   keyof typeof availableScriptures,
   { name: string; category: string }
 >
-
-// Logic
-// ========================================================
 
 type ScriptureMap = Partial<
   Record<keyof typeof availableScriptures, Scripture | undefined>

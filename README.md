@@ -28,16 +28,16 @@ Scripture is added regardless of theological validity or sectarian opinion, as t
 
 - Distraction-less interface
 - Tabbed browsing for individual chapters
+- Multiple adjustable views for parallel reading/comparison
 - Toggleable sidebar listing the scriptures
 - Search engine for verse contents
 - Adjustable zoom level (separate from browser zoom)
-- Current workspace state saves in URL (for saving)
+- Current workspace state saves in URL (for saving) **or** in `LocalStorage`
+- Saveable chapters and verses with `LocalStorage`
 
 ### Planned
 
-- Saveable chapters and verses with `LocalStorage`
 - Broader search engine for full-Bible searches
-- Scriptures from other Christian sects (e.g. Book of Common Prayer, etc.)
 - Dictionary for verse interpretation
 
 ## Other tools

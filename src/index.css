@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 html,
 body {
@@ -30,6 +28,15 @@ h1 {
   @apply flex flex-col overflow-y-scroll items-center py-16;
 }
 
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 .verse {
   font-family: "Ensign:Serif";
   max-width: var(--verse-width);
@@ -38,4 +45,11 @@ h1 {
 
 .verse sup {
   @apply inline opacity-50 mr-2 hover:underline hover:opacity-100 select-none;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { Icon } from "@iconify/react"
-import { motion } from "framer-motion"
+import { motion } from "motion/react"
 
-export default function Spoiler({ name, children }) {
+export default function Spoiler({ name, children, contentsClassName }) {
   const [shown, setShown] = useState(false)
 
   return (
@@ -26,7 +26,9 @@ export default function Spoiler({ name, children }) {
         }}
         className="spoiler-contents"
       >
-        <div className="p-4 grid gap-2 grid-cols-8">{children}</div>
+        <div className={contentsClassName ?? "p-4 grid gap-2 grid-cols-8"}>
+          {children}
+        </div>
       </motion.div>
     </>
   )
