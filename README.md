@@ -33,7 +33,7 @@ Scripture is added regardless of theological validity or sectarian opinion, as t
 - Search engine for verse contents
 - Adjustable zoom level (separate from browser zoom)
 - Current workspace state saves in URL (for saving) **or** in `LocalStorage`
-- Saveable chapters and verses with `LocalStorage`
+- Verse bookmarks for later reading or for studying purposes
 
 ### Planned
 
